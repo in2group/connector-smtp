@@ -4,6 +4,11 @@ public struct ConnectionProperties {
 }
 
 public struct Message {
+    string from;
+    string[] to;
+    string[] cc;
+    string subject;
+    string content;
 }
 
 @Description { value:"SMTP Client Connector."}
@@ -14,7 +19,10 @@ public connector ClientConnector (string host, int port, ConnectionProperties op
 
     map sharedMap = {};
 
-    @Description {value:"The send action implementation which sends an SMTP message."}
+    @Description {value:"The send action implementation which sends a SMTP message."}
     native action send (Message message);
+
+    @Description {value:"The close action implementation which closes the connection to mail server."}
+    native action close ();
 
 }
