@@ -133,6 +133,16 @@
                 <artifactId>ballerina-builtin</artifactId>
                 <version>${ballerina.version}</version>
             </dependency>
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${javax-mail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>javax.mail-api</artifactId>
+                <version>${javax-mail-api.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -175,6 +185,8 @@
         <project.scm.id>in2-scm-server</project.scm.id>
 
         <ballerina.version>0.95.0</ballerina.version>
+        <javax-mail.version>1.4.7</javax-mail.version>
+        <javax-mail-api.version>1.5.6</javax-mail-api.version>
 
         <mvn.processor.plugin.version>2.2.4</mvn.processor.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
