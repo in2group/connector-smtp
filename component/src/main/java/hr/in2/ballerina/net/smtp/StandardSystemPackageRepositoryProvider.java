@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package hr.in2.ballerina.azure.iotdevice;
+package hr.in2.ballerina.net.smtp;
 
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.repository.PackageRepository;
