@@ -19,13 +19,15 @@ package hr.in2.ballerina.net.smtp;
 
 import org.ballerinalang.connector.api.ConnectorFuture;
 import org.ballerinalang.model.types.BType;
-import org.ballerinalang.model.values.BStruct;
+import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.nativeimpl.actions.ClientConnectorFuture;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 
@@ -42,17 +44,33 @@ public class SmtpDataSource implements BValue {
     public SmtpDataSource() {
     }
 
-    public boolean init(String host, long port, BStruct options) {
-        Properties mailServerProperties = System.getProperties();
+    public boolean init(String host, long port, BMap<String, BValue> properties) {
+        Properties mailServerProperties = new Properties();
         mailServerProperties.put("mail.smtp.host", host);
         mailServerProperties.put("mail.smtp.port", port);
 
+        if (properties != null) {
+            for (String key : properties.keySet()) {
+                mailServerProperties.put(key, properties.get(key).stringValue());
+            }
+        }
+
+        Authenticator authenticator = null;
+        if (mailServerProperties.containsKey("mail.smtp.auth")) {
+            authenticator = new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(mailServerProperties.getProperty("mail.smtp.user"),
+                            mailServerProperties.getProperty("mail.smtp.password"));
+                }
+            };
+        }
+
         try {
-            session = Session.getDefaultInstance(mailServerProperties, null);
+            session = Session.getDefaultInstance(mailServerProperties, authenticator);
             transport = session.getTransport("smtp");
             transport.connect();
         } catch (Throwable e) {
-            throw new BallerinaException("Cannnot open connection to " + host + ":" + port, e);
+            throw new BallerinaException("Cannnot open connection to " + host + ":" + port + " (" + e + ")", e);
         }
         return true;
     }
