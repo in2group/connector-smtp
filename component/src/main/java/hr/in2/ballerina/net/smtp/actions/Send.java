@@ -64,7 +64,7 @@ public class Send extends AbstractSmtpAction {
             Message message = message(bMessage, dataSource.getSession());
             dataSource.getTransport().sendMessage(message, message.getAllRecipients());
         } catch (Throwable e) {
-            throw new BallerinaException("failed to send mail message (" + e + ")", e);
+            throw new BallerinaException("Failed to send mail message (" + e + ")", e);
         }
 
         return getConnectorFuture();
@@ -72,7 +72,9 @@ public class Send extends AbstractSmtpAction {
 
     protected Message message(BStruct bMessage, Session session) throws AddressException, MessagingException {
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(bMessage.getStringField(0), true));
+        if (bMessage.getStringField(0) != null && !bMessage.getStringField(0).equals("")) {
+            message.setFrom(new InternetAddress(bMessage.getStringField(0), true));
+        }
         if (bMessage.getRefField(0) != null) {
             message.addRecipients(Message.RecipientType.TO, recipients((BStringArray) bMessage.getRefField(0)));
         }

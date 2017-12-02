@@ -1,8 +1,5 @@
 package ballerina.net.smtp;
 
-public struct ConnectionProperties {
-}
-
 public struct Message {
     string from;
     string[] to;
@@ -14,8 +11,8 @@ public struct Message {
 @Description { value:"SMTP Client Connector."}
 @Param { value:"host: Host address of mail server" }
 @Param { value:"port: Port of mail server" }
-@Param { value:"options: Optional properties for mail server connection" }
-public connector ClientConnector (string host, int port, ConnectionProperties options) {
+@Param { value:"properties: Optional properties for mail server connection" }
+public connector ClientConnector (string host, int port, map properties) {
 
     map sharedMap = {};
 
