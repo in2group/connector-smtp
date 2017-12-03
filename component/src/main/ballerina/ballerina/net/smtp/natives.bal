@@ -6,6 +6,12 @@ public struct Message {
     string[] cc;
     string subject;
     string content;
+    Attachment[] attachments;
+}
+
+public struct Attachment {
+    string name;
+    blob content;
 }
 
 @Description { value:"SMTP Client Connector."}
