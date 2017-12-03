@@ -20,23 +20,31 @@ package hr.in2.ballerina.net.smtp.actions;
 import hr.in2.ballerina.net.smtp.Constants;
 import hr.in2.ballerina.net.smtp.SmtpDataSource;
 
+import org.apache.axiom.attachments.ByteArrayDataSource;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.connector.api.ConnectorFuture;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BConnector;
+import org.ballerinalang.model.values.BRefValueArray;
 import org.ballerinalang.model.values.BStringArray;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaAction;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 /**
  * {@code Send} action to send a number of mail messages to mail server.
@@ -81,9 +89,34 @@ public class Send extends AbstractSmtpAction {
         if (bMessage.getRefField(1) != null) {
             message.addRecipients(Message.RecipientType.CC, recipients((BStringArray) bMessage.getRefField(1)));
         }
-        message.setSubject(bMessage.getStringField(1));
-        message.setContent(bMessage.getStringField(2), "text/plain");
+        message.setSubject(bMessage.getStringField(1), "UTF-8");
+        if (bMessage.getRefField(2) != null) {
+            message.setContent(multipart(bMessage));
+        } else {
+            message.setText(bMessage.getStringField(2), "UTF-8");
+        }
         return message;
+    }
+
+    protected Multipart multipart(BStruct bMessage) throws MessagingException {
+        Multipart multipart = new MimeMultipart();
+
+        // First part is message
+        BodyPart messageBodyPart = new MimeBodyPart();
+        messageBodyPart.setText(bMessage.getStringField(2));
+        multipart.addBodyPart(messageBodyPart);
+
+        // Second part are attachments
+        BRefValueArray attachments = (BRefValueArray) bMessage.getRefField(2);
+        for (int i = 0; i < attachments.size(); i++) {
+            messageBodyPart = new MimeBodyPart();
+            DataSource source = new ByteArrayDataSource(((BStruct) attachments.get(i)).getBlobField(0));
+            messageBodyPart.setDataHandler(new DataHandler(source));
+            messageBodyPart.setFileName(((BStruct) attachments.get(i)).getStringField(0));
+            multipart.addBodyPart(messageBodyPart);
+        }
+
+        return multipart;
     }
 
     protected Address recipient(String address) throws AddressException {
